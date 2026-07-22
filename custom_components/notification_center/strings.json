@@ -16,7 +16,8 @@
     },
     "error": {
       "single_instance_allowed": "Only one Notification Center instance is supported.",
-      "no_notifications": "No notifications have been configured."
+      "no_notifications": "No notifications have been configured.",
+      "test_failed": "The notification test could not be sent. Check the Home Assistant log for details."
     },
     "abort": {
       "single_instance_allowed": "Notification Center is already configured."

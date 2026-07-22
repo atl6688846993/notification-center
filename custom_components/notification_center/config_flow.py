@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 
 import voluptuous as vol
 from homeassistant import config_entries
@@ -35,6 +36,7 @@ _MODE_SELECTOR = selector.SelectSelector(
         mode=selector.SelectSelectorMode.DROPDOWN,
     )
 )
+_LOGGER = logging.getLogger(__name__)
 
 
 class NotificationCenterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -185,8 +187,13 @@ class NotificationCenterOptionsFlow(config_entries.OptionsFlow):
 
     async def async_step_test_outcome(self, user_input=None):
         if user_input is not None and self._test_id:
-            coordinator = self.hass.data[DOMAIN][self.config_entry.entry_id]
-            await coordinator.async_test_notification(self._test_id, user_input["outcome"])
+            try:
+                coordinator = next(iter(self.hass.data[DOMAIN].values()))
+                await coordinator.async_test_notification(self._test_id, user_input["outcome"])
+            except Exception:
+                _LOGGER.exception("Unable to test notification %s", self._test_id)
+                self._test_id = None
+                return self.async_abort(reason="test_failed")
             self._test_id = None
             return await self.async_step_init()
         return await self.async_step_test_notification()
