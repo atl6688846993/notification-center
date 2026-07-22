@@ -149,6 +149,18 @@ After editing a notification, choose **Configure > Test notification delivery**.
 
 Testing does not activate, clear, mute, or extend the notification and does not change its duration timers. If no devices are selected on the notification or panel, the test has no mobile destination.
 
+The same test can be called from an automation or Developer Tools using the
+`notification_center.test` action:
+
+```yaml
+action: notification_center.test
+data:
+  notification_id: example_notification
+  outcome: critical
+```
+
+Omit `outcome` to test the notification's current template result.
+
 ## License and attribution
 
 This project is released under the MIT License. It is an independent community project and is not affiliated with or endorsed by the Home Assistant project. Home Assistant is a trademark of its respective owner. Third-party dependencies retain their original licenses.

@@ -46,3 +46,16 @@ global_mute:
             - minutes
             - hours
             - days
+test:
+  name: Test notification delivery
+  description: Send a configured notification outcome to its selected mobile devices without changing notification state.
+  fields:
+    notification_id:
+      required: true
+      selector:
+        text:
+    outcome:
+      required: false
+      description: Use the configured outcome key, or leave blank to evaluate the current template result.
+      selector:
+        text:

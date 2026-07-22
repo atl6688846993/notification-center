@@ -26,9 +26,16 @@ async def async_setup(hass: HomeAssistant, config) -> bool:
         coordinator = next(iter(hass.data[DOMAIN].values()))
         await coordinator.async_global_mute(call.data.get("duration"), call.data.get("unit"))
 
+    async def test(call: ServiceCall) -> None:
+        coordinator = next(iter(hass.data[DOMAIN].values()))
+        await coordinator.async_test_notification(
+            call.data["notification_id"], call.data.get("outcome", "__current__")
+        )
+
     hass.services.async_register(DOMAIN, "mute", mute)
     hass.services.async_register(DOMAIN, "unmute", unmute)
     hass.services.async_register(DOMAIN, "global_mute", global_mute)
+    hass.services.async_register(DOMAIN, "test", test)
     return True
 
 
