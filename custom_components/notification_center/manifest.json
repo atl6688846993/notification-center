@@ -1,10 +1,12 @@
 {
-  "domain": "notification_center",
-  "name": "Notification Center",
-  "version": "0.1.1",
-  "documentation": "https://github.com/atl6688846993/notification-center",
-  "issue_tracker": "https://github.com/atl6688846993/notification-center/issues",
-  "codeowners": ["@atl6688846993"],
-  "config_flow": true,
-  "iot_class": "local_push"
+    "domain":  "notification_center",
+    "name":  "Notification Center",
+    "version":  "0.1.2",
+    "documentation":  "https://github.com/atl6688846993/notification-center",
+    "issue_tracker":  "https://github.com/atl6688846993/notification-center/issues",
+    "codeowners":  [
+                       "@atl6688846993"
+                   ],
+    "config_flow":  true,
+    "iot_class":  "local_push"
 }

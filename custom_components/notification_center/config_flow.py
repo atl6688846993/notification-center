@@ -75,12 +75,11 @@ class NotificationCenterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @staticmethod
     @callback
     def async_get_options_flow(config_entry):
-        return NotificationCenterOptionsFlow(config_entry)
+        return NotificationCenterOptionsFlow()
 
 
 class NotificationCenterOptionsFlow(config_entries.OptionsFlow):
-    def __init__(self, config_entry):
-        self.config_entry = config_entry
+    def __init__(self):
         self._selected_id = None
 
     async def async_step_init(self, user_input=None):
@@ -199,4 +198,3 @@ class NotificationCenterOptionsFlow(config_entries.OptionsFlow):
         data = dict(self.config_entry.data)
         data[CONF_NOTIFICATIONS] = notifications
         self.hass.config_entries.async_update_entry(self.config_entry, data=data)
-
