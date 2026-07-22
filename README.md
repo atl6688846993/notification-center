@@ -4,7 +4,7 @@ Notification Center is a Home Assistant custom integration and Lovelace card for
 
 ## Status
 
-Initial development release. This project is intended for testing and migration from dashboard-only notification prototypes.
+Initial development release. This project is intended for testing and general-purpose Home Assistant notification workflows.
 
 ## Features
 
@@ -44,34 +44,31 @@ The card shows only active, unmuted notifications by default. Muted active notif
 
 Boolean mode should return true or false:
 
-    {{ states('sensor.hvac_filter_days_remaining') | int(999) <= 7 }}
+    {{ is_state('input_boolean.example_notification_enabled', 'on')
+       and states('sensor.example_value') | int(999) <= 7 }}
 
 Outcome mode should return a configured outcome key:
 
-    {% set moisture = states('sensor.plant_sensor_1_soil_moisture') | float(-1) %}
-    {% set target = states('sensor.sensor_1_moisture_threshold') | float(-1) %}
-    {% if moisture <= target - 5 %}
-      needs_water
-    {% elif moisture >= target + 15 %}
-      too_wet
+    {% set value = states('sensor.example_value') | float(-1) %}
+    {% if value < 0 %}
+      0
+    {% elif value < 25 %}
+      needs_attention
+    {% elif value > 90 %}
+      critical
     {% else %}
       0
     {% endif %}
 
 The returned value selects the outcome. The outcome supplies the message, title, icon, severity, styling, and delivery behavior. Templates should return an evaluation value, not HTML or CSS.
 
-## Current migration
+## Configuration guidance
 
-The first configuration includes:
-
-- HVAC Filter
-- Cat Feeder
-- Plant Sensor 1
-- Plant Sensor 2
-
-The Dog Poop placeholder is intentionally excluded.
+Create notification definitions in the integration options flow. Use generic or
+user-defined names, entity references, messages, outcomes, device targets,
+persistence overrides, and mute settings. The project does not require any
+specific household configuration.
 
 ## License and attribution
 
 This project is released under the MIT License. It is an independent community project and is not affiliated with or endorsed by the Home Assistant project. Home Assistant is a trademark of its respective owner. Third-party dependencies retain their original licenses.
-
