@@ -1,6 +1,10 @@
 # Notification Center
 
+![Sputnik Digital](custom_components/notification_center/brand/logo.png)
+
 Notification Center is a Home Assistant custom integration and Lovelace card for named, Jinja-driven notifications. It evaluates Boolean or multi-outcome templates, keeps active/muted state, and sends mobile-app notifications to selected Home Assistant devices.
+
+The integration is branded with the Sputnik Digital logo. Home Assistant uses the bundled `brand/icon.png` and `brand/logo.png` files for the Notification Center integration surfaces.
 
 ## Status
 
