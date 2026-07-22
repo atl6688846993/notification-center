@@ -3,13 +3,13 @@
     "step": {
       "user": {
         "title": "Notification Center",
-        "description": "Set panel-wide persistence, mute, and default device settings.",
+        "description": "Set how long active notifications remain available, how long mutes last, and which mobile devices receive notifications.",
         "data": {
-          "name": "Name",
-          "persistence": "Default persistence duration",
-          "persistence_unit": "Persistence unit",
+          "name": "Panel name",
+          "persistence": "Default active notification duration",
+          "persistence_unit": "Active duration unit",
           "mute_duration": "Default mute duration",
-          "mute_unit": "Mute unit",
+          "mute_unit": "Mute duration unit",
           "devices": "Default mobile devices"
         }
       }
@@ -30,37 +30,70 @@
           "settings": "Panel settings",
           "add_notification": "Add notification",
           "edit_notification": "Edit notification",
+          "test_notification": "Test notification delivery",
           "remove_notification": "Remove notification"
         }
       },
       "settings": {
         "title": "Panel settings",
         "data": {
-          "persistence": "Default persistence duration",
-          "persistence_unit": "Persistence unit",
+          "persistence": "Default active notification duration",
+          "persistence_unit": "Active duration unit",
           "mute_duration": "Default mute duration",
-          "mute_unit": "Mute unit"
+          "mute_unit": "Mute duration unit"
         }
       },
       "add_notification": {
         "title": "Add notification",
         "data": {
-          "name": "Name",
+          "name": "Notification name",
           "id": "Notification ID",
           "mode": "Evaluation mode",
-          "template": "Jinja template",
-          "outcomes": "Outcomes JSON",
-          "devices": "Mobile devices",
-          "persistence": "Persistence override",
-          "persistence_unit": "Persistence unit",
+          "entity": "Entity to evaluate",
+          "template": "Jinja evaluation template",
+          "outcomes": "Outcome definitions (JSON)",
+          "devices": "Mobile devices to notify",
+          "persistence": "Active duration override",
+          "persistence_unit": "Override duration unit",
           "mute_duration": "Mute duration override",
-          "mute_unit": "Mute unit"
+          "mute_unit": "Override mute unit"
+        },
+        "data_description": {
+          "name": "Friendly name shown in dashboards and mobile notifications.",
+          "id": "Unique stable key used by dashboard cards and services.",
+          "mode": "Boolean evaluates on/off. Outcome evaluates a named value returned by the template.",
+          "entity": "Optional shortcut for Boolean notifications. Select the entity whose on/off state should be checked.",
+          "template": "Jinja that returns true/false, on/off, or an outcome key. Leave the entity shortcut to handle a simple Boolean check.",
+          "outcomes": "JSON object keyed by the value returned from the entity or template. Each value can define active, title, message, icon, severity, and CSS.",
+          "devices": "Select one or more mobile devices. Leave empty to disable delivery for this notification.",
+          "persistence": "How long this notification remains active before it expires. Leave blank to use the panel default.",
+          "mute_duration": "How long this notification stays hidden after it is muted. Leave blank to use the panel default."
         }
       },
       "edit_notification": {
         "title": "Edit notification",
         "data": {
-          "selected_id": "Notification"
+          "selected_id": "Notification to edit"
+        },
+        "data_description": {
+          "selected_id": "Choose a notification to update its entity, Jinja template, outcomes, devices, and timing settings."
+        }
+      },
+      "test_notification": {
+        "title": "Test notification delivery",
+        "description": "Send a test message to the selected notification's configured mobile devices without changing its active or muted state.",
+        "data": {
+          "selected_id": "Notification to test"
+        },
+        "data_description": {
+          "selected_id": "Choose the notification whose configured message and target devices you want to test."
+        }
+      },
+      "test_outcome": {
+        "title": "Choose test outcome",
+        "description": "The test sends the selected outcome's title and message. Current template result evaluates the notification exactly as it is now.",
+        "data": {
+          "outcome": "Outcome to send"
         }
       },
       "remove_notification": {

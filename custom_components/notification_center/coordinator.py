@@ -13,6 +13,7 @@ from .const import (
     CONF_MODE,
     CONF_MUTE_DURATION,
     CONF_MUTE_UNIT,
+    CONF_ENTITY,
     CONF_OUTCOMES,
     CONF_PERSISTENCE,
     CONF_PERSISTENCE_UNIT,
@@ -121,14 +122,22 @@ class NotificationCoordinator(DataUpdateCoordinator[dict[str, RuntimeNotificatio
         return _duration(settings.get(CONF_PERSISTENCE), settings.get(CONF_PERSISTENCE_UNIT))
 
     def _evaluate(self, definition: dict[str, Any]) -> RuntimeNotification:
-        template = Template(definition.get(CONF_TEMPLATE, "false"), self.hass)
         try:
-            rendered = template.async_render(parse_result=False).strip()
             mode = definition.get(CONF_MODE, MODE_BOOLEAN)
+            if mode == MODE_BOOLEAN and definition.get(CONF_ENTITY):
+                rendered = self.hass.states.get(definition[CONF_ENTITY])
+                rendered = rendered.state if rendered else "off"
+            else:
+                template = Template(definition.get(CONF_TEMPLATE) or "false", self.hass)
+                rendered = template.async_render(parse_result=False).strip()
             if mode == MODE_BOOLEAN:
-                active = rendered.lower() in ("true", "on", "yes", "1")
-                state = "1" if active else "0"
-                outcome = definition.get(CONF_OUTCOMES, {}).get(state, {})
+                active = str(rendered).lower() in ("true", "on", "yes", "1")
+                state = "on" if active else "off"
+                outcomes = definition.get(CONF_OUTCOMES, {})
+                outcome = next(
+                    (outcomes[key] for key in (state, "true" if active else "false", "1" if active else "0") if key in outcomes),
+                    {},
+                )
             else:
                 state = rendered or "0"
                 outcome = definition.get(CONF_OUTCOMES, {}).get(state, {})
@@ -149,6 +158,26 @@ class NotificationCoordinator(DataUpdateCoordinator[dict[str, RuntimeNotificatio
                 active=False,
                 error=str(err),
             )
+
+    async def async_test_notification(self, notification_id: str, outcome_key: str | None = None) -> None:
+        definition = self.definition(notification_id)
+        if not definition:
+            return
+        if outcome_key in (None, "__current__"):
+            item = self._evaluate(definition)
+        else:
+            outcome = definition.get(CONF_OUTCOMES, {}).get(outcome_key, {})
+            active = bool(outcome.get("active", outcome_key not in ("0", "off", "false")))
+            item = RuntimeNotification(
+                notification_id=notification_id,
+                name=definition.get("name", notification_id),
+                state=outcome_key,
+                active=active,
+                outcome=outcome,
+            )
+        delivery_definition = dict(definition)
+        delivery_definition["devices"] = definition.get("devices") or self.settings.get("devices", [])
+        await self.delivery.async_test(delivery_definition, item)
 
     def definition(self, notification_id: str) -> dict[str, Any] | None:
         return next((item for item in self.definitions if item["id"] == notification_id), None)

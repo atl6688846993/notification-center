@@ -45,6 +45,21 @@ class NotificationDelivery:
                 blocking=False,
             )
 
+    async def async_test(self, definition: dict[str, Any], item) -> None:
+        device_ids = definition.get("devices", [])
+        services = self._services_for_devices(device_ids)
+        if not services:
+            return
+        title = item.outcome.get("title", item.name)
+        message = item.outcome.get("message", item.name)
+        for service in services:
+            await self.hass.services.async_call(
+                "notify",
+                service,
+                {"title": f"[Test] {title}", "message": message},
+                blocking=False,
+            )
+
     def _services_for_devices(self, device_ids: list[str]) -> set[str]:
         registry = dr.async_get(self.hass)
         names = {

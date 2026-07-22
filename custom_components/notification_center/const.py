@@ -12,6 +12,7 @@ CONF_SETTINGS = "settings"
 CONF_TEMPLATE = "template"
 CONF_MODE = "mode"
 CONF_OUTCOMES = "outcomes"
+CONF_ENTITY = "entity"
 CONF_ENABLED = "enabled"
 
 MODE_BOOLEAN = "boolean"
@@ -24,4 +25,3 @@ DEFAULT_SETTINGS = {
     CONF_MUTE_UNIT: "hours",
     CONF_DEVICES: [],
 }
-

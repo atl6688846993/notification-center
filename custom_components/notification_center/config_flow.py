@@ -9,6 +9,7 @@ from homeassistant.helpers import selector
 
 from .const import (
     CONF_DEVICES,
+    CONF_ENTITY,
     CONF_MUTE_DURATION,
     CONF_MUTE_UNIT,
     CONF_NAME,
@@ -81,11 +82,12 @@ class NotificationCenterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 class NotificationCenterOptionsFlow(config_entries.OptionsFlow):
     def __init__(self):
         self._selected_id = None
+        self._test_id = None
 
     async def async_step_init(self, user_input=None):
         return self.async_show_menu(
             step_id="init",
-            menu_options=["settings", "add_notification", "edit_notification", "remove_notification"],
+            menu_options=["settings", "add_notification", "edit_notification", "test_notification", "remove_notification"],
         )
 
     async def async_step_settings(self, user_input=None):
@@ -160,6 +162,35 @@ class NotificationCenterOptionsFlow(config_entries.OptionsFlow):
             ),
         )
 
+    async def async_step_test_notification(self, user_input=None):
+        notifications = self.config_entry.data.get(CONF_NOTIFICATIONS, [])
+        if not notifications:
+            return self.async_abort(reason="no_notifications")
+        if user_input is not None:
+            self._test_id = user_input["selected_id"]
+            target = next(item for item in notifications if item["id"] == self._test_id)
+            outcomes = target.get(CONF_OUTCOMES, {})
+            options = {"__current__": "Current template result"}
+            options.update({key: self._outcome_label(key, value) for key, value in outcomes.items()})
+            return self.async_show_form(
+                step_id="test_outcome",
+                data_schema=vol.Schema({vol.Required("outcome", default="__current__"): vol.In(options)}),
+            )
+        return self.async_show_form(
+            step_id="test_notification",
+            data_schema=vol.Schema(
+                {vol.Required("selected_id"): vol.In({item["id"]: item.get("name", item["id"]) for item in notifications})}
+            ),
+        )
+
+    async def async_step_test_outcome(self, user_input=None):
+        if user_input is not None and self._test_id:
+            coordinator = self.hass.data[DOMAIN][self.config_entry.entry_id]
+            await coordinator.async_test_notification(self._test_id, user_input["outcome"])
+            self._test_id = None
+            return await self.async_step_init()
+        return await self.async_step_test_notification()
+
     def _notification_schema(self, item=None):
         item = item or {}
         return vol.Schema(
@@ -167,7 +198,10 @@ class NotificationCenterOptionsFlow(config_entries.OptionsFlow):
                 vol.Required(CONF_NAME, default=item.get(CONF_NAME, "")): str,
                 vol.Required("id", default=item.get("id", "")): str,
                 vol.Required("mode", default=item.get("mode", MODE_BOOLEAN)): _MODE_SELECTOR,
-                vol.Required("template", default=item.get("template", "false")): selector.TemplateSelector(),
+                vol.Optional(CONF_ENTITY, default=item.get(CONF_ENTITY, "")): selector.EntitySelector(
+                    selector.EntitySelectorConfig()
+                ),
+                vol.Optional("template", default=item.get("template", "")): selector.TemplateSelector(),
                 vol.Optional("outcomes", default=json.dumps(item.get("outcomes", {}), indent=2)): selector.TextSelector(
                     selector.TextSelectorConfig(multiline=True)
                 ),
@@ -193,6 +227,11 @@ class NotificationCenterOptionsFlow(config_entries.OptionsFlow):
         except (TypeError, ValueError):
             item["outcomes"] = {}
         return item
+
+    @staticmethod
+    def _outcome_label(key, outcome):
+        title = outcome.get("title") or outcome.get("message") or "Configured outcome"
+        return f"{key}: {title}"
 
     def _save(self, notifications):
         data = dict(self.config_entry.data)
