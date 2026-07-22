@@ -53,7 +53,7 @@ class NotificationCenterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         CONF_MUTE_UNIT: user_input[CONF_MUTE_UNIT],
                         CONF_DEVICES: user_input.get(CONF_DEVICES, []),
                     },
-                    CONF_NOTIFICATIONS: _default_notifications(),
+                    CONF_NOTIFICATIONS: [],
                 },
             )
         return self.async_show_form(
@@ -200,53 +200,3 @@ class NotificationCenterOptionsFlow(config_entries.OptionsFlow):
         data[CONF_NOTIFICATIONS] = notifications
         self.hass.config_entries.async_update_entry(self.config_entry, data=data)
 
-
-def _default_notifications():
-    return [
-        {
-            "id": "hvac_filter",
-            "name": "HVAC Filter",
-            "mode": MODE_BOOLEAN,
-            "template": "{{ is_state('input_boolean.notification_hvac_filter_enabled', 'on') and states('sensor.hvac_filter_days_remaining') | int(999) <= 7 }}",
-            "outcomes": {
-                "0": {"active": False, "message": "HVAC filter is not due soon.", "icon": "mdi:air-filter", "severity": "normal"},
-                "1": {"active": True, "message": "{{ states('sensor.hvac_filter_days_remaining') }} days remaining. Due {{ states('sensor.hvac_filter_replacement_date') }}.", "icon": "mdi:air-filter", "severity": "warning"},
-            },
-            "delivery": {"events": {"activate": True, "outcome_change": True, "clear": False, "repeat": False}},
-        },
-        {
-            "id": "plant_1",
-            "name": "Plant Sensor 1",
-            "mode": MODE_OUTCOME,
-            "template": "{% if not is_state('input_boolean.notification_plant_1_enabled', 'on') %}0{% else %}{% set moisture = states('sensor.plant_sensor_1_soil_moisture') | float(-1) %}{% set target = states('sensor.sensor_1_moisture_threshold') | float(-1) %}{% if moisture < 0 or target < 0 %}0{% elif moisture <= target - 5 %}needs_water{% elif moisture >= target + 15 %}too_wet{% else %}0{% endif %}{% endif %}",
-            "outcomes": {
-                "0": {"active": False, "message": "Plant moisture is within range.", "icon": "mdi:sprout", "severity": "normal"},
-                "needs_water": {"active": True, "message": "Plant 1 needs water.", "icon": "mdi:watering-can", "severity": "warning"},
-                "too_wet": {"active": True, "message": "Plant 1 is too wet.", "icon": "mdi:water-alert", "severity": "warning"},
-            },
-            "delivery": {"events": {"activate": True, "outcome_change": True, "clear": False, "repeat": False}},
-        },
-        {
-            "id": "plant_2",
-            "name": "Plant Sensor 2",
-            "mode": MODE_OUTCOME,
-            "template": "{% if not is_state('input_boolean.notification_plant_2_enabled', 'on') %}0{% else %}{% set moisture = states('sensor.plant_sensor_2_soil_moisture') | float(-1) %}{% set target = states('sensor.sensor_2_moisture_threshold') | float(-1) %}{% if moisture < 0 or target < 0 %}0{% elif moisture <= target - 5 %}needs_water{% elif moisture >= target + 15 %}too_wet{% else %}0{% endif %}{% endif %}",
-            "outcomes": {
-                "0": {"active": False, "message": "Plant moisture is within range.", "icon": "mdi:sprout", "severity": "normal"},
-                "needs_water": {"active": True, "message": "Plant 2 needs water.", "icon": "mdi:watering-can", "severity": "warning"},
-                "too_wet": {"active": True, "message": "Plant 2 is too wet.", "icon": "mdi:water-alert", "severity": "warning"},
-            },
-            "delivery": {"events": {"activate": True, "outcome_change": True, "clear": False, "repeat": False}},
-        },
-        {
-            "id": "cat_feeder",
-            "name": "Cat Feeder",
-            "mode": MODE_BOOLEAN,
-            "template": "{{ is_state('input_boolean.notification_cat_feeder_enabled', 'on') and (is_state('input_boolean.cat_feeder_food_needed', 'on') or is_state('input_boolean.cat_feeder_food_demo', 'on')) }}",
-            "outcomes": {
-                "0": {"active": False, "message": "Cat feeder is ready.", "icon": "mdi:food-drumstick", "severity": "normal"},
-                "1": {"active": True, "message": "Cat feeder needs food.", "icon": "mdi:food-drumstick", "severity": "warning"},
-            },
-            "delivery": {"events": {"activate": True, "outcome_change": True, "clear": False, "repeat": False}},
-        },
-    ]

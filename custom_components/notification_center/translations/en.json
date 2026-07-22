@@ -21,6 +21,57 @@
     "abort": {
       "single_instance_allowed": "Notification Center is already configured."
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Notification Center",
+        "menu_options": {
+          "settings": "Panel settings",
+          "add_notification": "Add notification",
+          "edit_notification": "Edit notification",
+          "remove_notification": "Remove notification"
+        }
+      },
+      "settings": {
+        "title": "Panel settings",
+        "data": {
+          "persistence": "Default persistence duration",
+          "persistence_unit": "Persistence unit",
+          "mute_duration": "Default mute duration",
+          "mute_unit": "Mute unit"
+        }
+      },
+      "add_notification": {
+        "title": "Add notification",
+        "data": {
+          "name": "Name",
+          "id": "Notification ID",
+          "mode": "Evaluation mode",
+          "template": "Jinja template",
+          "outcomes": "Outcomes JSON",
+          "devices": "Mobile devices",
+          "persistence": "Persistence override",
+          "persistence_unit": "Persistence unit",
+          "mute_duration": "Mute duration override",
+          "mute_unit": "Mute unit"
+        }
+      },
+      "edit_notification": {
+        "title": "Edit notification",
+        "data": {
+          "selected_id": "Notification"
+        }
+      },
+      "remove_notification": {
+        "title": "Remove notification",
+        "data": {
+          "selected_id": "Notification"
+        }
+      }
+    },
+    "abort": {
+      "no_notifications": "No notifications have been configured."
+    }
   }
 }
-

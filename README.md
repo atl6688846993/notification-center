@@ -40,6 +40,14 @@ Initial development release. This project is intended for testing and general-pu
 
 The card shows only active, unmuted notifications by default. Muted active notifications remain evaluated but are hidden until their mute timer expires. The Show Muted button can reveal active muted rows.
 
+## Active Notifications sensor
+
+The integration creates `sensor.active_notifications` on setup. This sensor is
+the total count of currently active, unmuted notification definitions. It is a
+summary sensor, not a notification definition, and it does not create example
+notifications automatically. A clean installation starts with zero configured
+notifications; add definitions through the integration's **Configure** menu.
+
 ## Jinja evaluation
 
 Boolean mode should return true or false:
