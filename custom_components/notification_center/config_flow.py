@@ -33,7 +33,10 @@ _UNIT_SELECTOR = selector.SelectSelector(
 )
 _MODE_SELECTOR = selector.SelectSelector(
     selector.SelectSelectorConfig(
-        options=[MODE_BOOLEAN, MODE_OUTCOME],
+        options=[
+            {"value": MODE_BOOLEAN, "label": "Boolean (on/off)"},
+            {"value": MODE_OUTCOME, "label": "Multiple outcomes"},
+        ],
         mode=selector.SelectSelectorMode.DROPDOWN,
     )
 )
@@ -210,9 +213,7 @@ class NotificationCenterOptionsFlow(config_entries.OptionsFlow):
                     selector.EntitySelectorConfig()
                 ),
                 vol.Optional("template", default=item.get("template", "")): selector.TemplateSelector(),
-                vol.Optional("outcomes", default=json.dumps(item.get("outcomes", {}), indent=2)): selector.TextSelector(
-                    selector.TextSelectorConfig(multiline=True)
-                ),
+                vol.Optional("outcomes", default=item.get("outcomes", {})): selector.ObjectSelector(),
                 vol.Optional(CONF_DEVICES, default=item.get(CONF_DEVICES, [])): selector.DeviceSelector(
                     selector.DeviceSelectorConfig(multiple=True)
                 ),
@@ -230,10 +231,13 @@ class NotificationCenterOptionsFlow(config_entries.OptionsFlow):
                 item.pop(key, None)
             elif item.get(key) is not None:
                 item[key] = float(item[key])
-        try:
-            item["outcomes"] = json.loads(item.get("outcomes", "{}"))
-        except (TypeError, ValueError):
-            item["outcomes"] = {}
+        outcomes = item.get("outcomes", {})
+        if isinstance(outcomes, str):
+            try:
+                outcomes = json.loads(outcomes or "{}")
+            except (TypeError, ValueError):
+                outcomes = {}
+        item["outcomes"] = outcomes if isinstance(outcomes, dict) else {}
         return item
 
     @staticmethod

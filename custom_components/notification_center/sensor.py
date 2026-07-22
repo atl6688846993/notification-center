@@ -48,6 +48,7 @@ class NotificationSensor(CoordinatorEntity, SensorEntity):
             "title": item.outcome.get("title", item.name),
             "severity": item.outcome.get("severity", "normal"),
             "icon": item.outcome.get("icon"),
+            "css": item.outcome.get("css", ""),
             "outcome": item.state,
             "error": item.error,
         }

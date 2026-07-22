@@ -42,14 +42,91 @@ The integration includes its Sputnik Digital icon and logo under
 
 ## Card
 
-    type: custom:notification-center-card
-    title: Notifications
-    notifications: all
-    show_muted: false
-    show_inactive: false
-    sort: severity
+The visual card editor provides controls for the title, empty-list message,
+notification selection, sorting, initial muted/inactive visibility, and custom
+CSS. Select **All configured notifications** to include new definitions
+automatically, or turn it off to choose notifications from a checklist.
+
+```yaml
+type: custom:notification-center-card
+title: Notifications
+empty_text: All clear
+notifications:
+  - front_door
+  - hvac_filter
+show_muted: false
+show_inactive: false
+sort: severity
+```
 
 The card shows only active, unmuted notifications by default. Muted active notifications remain evaluated but are hidden until their mute timer expires. The Show Muted button can reveal active muted rows.
+
+### Card styling
+
+The card editor's **Custom CSS** field applies CSS inside that card. These
+stable classes are available:
+
+- `.row`: Every notification row.
+- `.is-active` and `.is-inactive`: Whether the notification is currently active.
+- `.is-muted` and `.is-unmuted`: Whether the notification is currently muted.
+- `.value-0`, `.value-1`, `.value-true`, `.value-false`, and `.value-<outcome>`: The evaluated outcome. Custom outcome names are converted to lowercase CSS-safe names.
+- `.severity-normal`, `.severity-info`, `.severity-warning`, `.severity-error`, and `.severity-critical`: The configured severity.
+- `.notification-<id>`: A single notification, such as `.notification-front_door`.
+- `.notification-icon`: The leading status icon.
+- `.notification-name`: The notification's display name.
+- `.notification-message`: The outcome message.
+- `.notification-meta`: Outcome or mute timing text.
+- `.mute-button`: The row's mute or unmute button.
+- `.toggle-muted`: The card header's show/hide muted button.
+- `.empty`: The empty-list message.
+
+Example card-wide styling:
+
+```yaml
+type: custom:notification-center-card
+title: Notifications
+notifications: all
+empty_text: No alerts need attention
+custom_css: |
+  .row.is-active {
+    background: rgba(255, 255, 255, 0.08);
+  }
+  .row.value-1,
+  .row.value-true {
+    border-left-color: #ff5252;
+  }
+  .notification-front_door .notification-icon {
+    color: #ffb300;
+  }
+  .notification-name {
+    font-size: 1rem;
+    font-weight: 700;
+  }
+  .notification-message,
+  .notification-meta {
+    color: rgba(255, 255, 255, 0.72);
+  }
+  .mute-button {
+    color: rgba(255, 255, 255, 0.65);
+  }
+  .mute-button:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.12);
+  }
+```
+
+Each outcome may also define a `css` string. Outcome CSS is applied directly to
+that row and therefore overrides matching card-wide declarations:
+
+```yaml
+needs_attention:
+  active: true
+  title: Filter needs attention
+  message: Replace the HVAC filter soon.
+  icon: mdi:air-filter
+  severity: warning
+  css: "--notification-color: #ffb300; background: rgba(255, 179, 0, 0.12);"
+```
 
 ## Active Notifications sensor
 
@@ -87,17 +164,17 @@ Open the Notification Center integration and choose **Configure**. The options
 menu uses these terms:
 
 - **Panel settings**: Defaults used when an individual notification does not provide an override.
-- **Default active notification duration**: How long an active notification remains available before it expires. This is the user-facing meaning of the internal term "persistence."
-- **Default mute duration**: How long a muted active notification stays hidden before it becomes visible again.
-- **Default mobile devices**: Devices used when a notification does not specify its own device list.
-- **Notification name**: The friendly name shown in the dashboard and mobile notification.
-- **Notification ID**: A unique, stable internal key. Use lowercase letters, numbers, and underscores; dashboard cards use this value to select notifications.
-- **Evaluation mode**: Choose **Boolean** for an on/off result or **Outcome** for several named results.
-- **Entity to evaluate**: Optional entity picker for Boolean notifications. When supplied, the entity state is evaluated as on/off and the Jinja template is not required for the basic case.
-- **Jinja evaluation template**: Optional advanced logic that returns the value used by the notification. Templates can read Home Assistant states and attributes.
-- **Outcome definitions (JSON)**: A JSON object mapping returned values to the title, message, icon, severity, active state, and optional CSS for that result.
-- **Mobile devices to notify**: One or more device targets. An empty list disables mobile delivery for that notification.
-- **Active duration override** and **Mute duration override**: Per-notification timing values that replace the panel defaults.
+- **Default time to keep alerts active**: How long an active alert remains available unless its evaluation clears sooner.
+- **Default mute time**: How long a muted active alert stays hidden before it appears again.
+- **Default mobile notification devices**: Devices used when a notification does not specify its own delivery targets.
+- **Display name**: Friendly name shown on cards and in mobile notifications.
+- **Unique notification ID**: Stable internal key used by cards and actions. Use lowercase letters, numbers, and underscores.
+- **How should this notification be evaluated?**: Choose **Boolean (on/off)** for two-state checks or **Multiple outcomes** for a template that returns several named values.
+- **Entity for a simple on/off check**: Direct entity picker for Boolean notifications. A Jinja template is unnecessary when the entity state alone determines the result.
+- **Advanced Jinja template**: Optional logic for checks involving multiple entities, attributes, or calculations.
+- **Messages and appearance for each result**: Expandable YAML/JSON object mapping returned values to `active`, `title`, `message`, `icon`, `severity`, and optional `css` fields.
+- **Mobile devices for this notification**: One or more Home Assistant mobile app devices. An empty list disables mobile delivery for that definition.
+- **Active time** and **Mute time** overrides: Optional per-notification values that replace Panel settings.
 
 ### Boolean notifications
 

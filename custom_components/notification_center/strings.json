@@ -3,14 +3,22 @@
     "step": {
       "user": {
         "title": "Notification Center",
-        "description": "Set how long active notifications remain available, how long mutes last, and which mobile devices receive notifications.",
+        "description": "Create the Notification Center panel. These defaults apply to every notification unless an individual notification overrides them.",
         "data": {
-          "name": "Panel name",
-          "persistence": "Default active notification duration",
-          "persistence_unit": "Active duration unit",
-          "mute_duration": "Default mute duration",
-          "mute_unit": "Mute duration unit",
-          "devices": "Default mobile devices"
+          "name": "Notification Center name",
+          "persistence": "Default time to keep alerts active",
+          "persistence_unit": "Active time unit",
+          "mute_duration": "Default mute time",
+          "mute_unit": "Mute time unit",
+          "devices": "Default mobile notification devices"
+        },
+        "data_description": {
+          "name": "Name shown for this integration in Home Assistant.",
+          "persistence": "How long an alert remains active after it is triggered, unless that notification clears sooner.",
+          "persistence_unit": "Minutes, hours, or days for the default active time.",
+          "mute_duration": "How long a user-triggered mute hides an active alert before it appears again.",
+          "mute_unit": "Minutes, hours, or days for the default mute time.",
+          "devices": "Mobile app devices used when a notification does not choose its own delivery targets. Leave empty for no default delivery."
         }
       }
     },
@@ -37,47 +45,80 @@
       },
       "settings": {
         "title": "Panel settings",
+        "description": "Set the default active and mute times used by notifications that do not define their own overrides.",
         "data": {
-          "persistence": "Default active notification duration",
-          "persistence_unit": "Active duration unit",
-          "mute_duration": "Default mute duration",
-          "mute_unit": "Mute duration unit"
+          "persistence": "Default time to keep alerts active",
+          "persistence_unit": "Active time unit",
+          "mute_duration": "Default mute time",
+          "mute_unit": "Mute time unit"
+        },
+        "data_description": {
+          "persistence": "How long an alert remains active after it is triggered, unless its evaluation clears sooner.",
+          "persistence_unit": "Minutes, hours, or days for the default active time.",
+          "mute_duration": "How long an active alert stays hidden when a dashboard user mutes it.",
+          "mute_unit": "Minutes, hours, or days for the default mute time."
         }
       },
       "add_notification": {
         "title": "Add notification",
+        "description": "Define what Home Assistant should evaluate, what each result means, and which mobile devices should receive the alert.",
         "data": {
-          "name": "Notification name",
-          "id": "Notification ID",
-          "mode": "Evaluation mode",
-          "entity": "Entity to evaluate",
-          "template": "Jinja evaluation template",
-          "outcomes": "Outcome definitions (JSON)",
-          "devices": "Mobile devices to notify",
-          "persistence": "Active duration override",
-          "persistence_unit": "Override duration unit",
-          "mute_duration": "Mute duration override",
-          "mute_unit": "Override mute unit"
+          "name": "Display name",
+          "id": "Unique notification ID",
+          "mode": "How should this notification be evaluated?",
+          "entity": "Entity for a simple on/off check",
+          "template": "Advanced Jinja template (optional)",
+          "outcomes": "Messages and appearance for each result",
+          "devices": "Mobile devices for this notification",
+          "persistence": "Time to keep this alert active (optional)",
+          "persistence_unit": "Active time unit",
+          "mute_duration": "Mute time for this alert (optional)",
+          "mute_unit": "Mute time unit"
         },
         "data_description": {
-          "name": "Friendly name shown in dashboards and mobile notifications.",
-          "id": "Unique stable key used by dashboard cards and services.",
-          "mode": "Boolean evaluates on/off. Outcome evaluates a named value returned by the template.",
-          "entity": "Optional shortcut for Boolean notifications. Select the entity whose on/off state should be checked.",
-          "template": "Jinja that returns true/false, on/off, or an outcome key. Leave the entity shortcut to handle a simple Boolean check.",
-          "outcomes": "JSON object keyed by the value returned from the entity or template. Each value can define active, title, message, icon, severity, and CSS.",
-          "devices": "Select one or more mobile devices. Leave empty to disable delivery for this notification.",
-          "persistence": "How long this notification remains active before it expires. Leave blank to use the panel default.",
-          "mute_duration": "How long this notification stays hidden after it is muted. Leave blank to use the panel default."
+          "name": "Friendly name shown on dashboard cards and in mobile notifications.",
+          "id": "Stable internal key used by cards and actions. Use lowercase letters, numbers, and underscores; do not change it after automations depend on it.",
+          "mode": "Choose Boolean for an on/off result. Choose Multiple outcomes when a template can return several named values.",
+          "entity": "For a simple Boolean notification, select the entity whose on/off state should be checked. Leave empty when the Jinja template supplies the result.",
+          "template": "Optional Jinja that returns true/false, on/off, or one outcome key. Use this when the result depends on multiple entities, attributes, or calculations.",
+          "outcomes": "Map each possible returned value to active, title, message, icon, severity, and optional css fields. The editor accepts YAML or JSON objects and can expand to full screen.",
+          "devices": "Choose one or more Home Assistant mobile app devices. Leave empty to use no delivery targets for this notification.",
+          "persistence": "Optional override for how long this alert stays active. Leave blank to use Panel settings.",
+          "persistence_unit": "Minutes, hours, or days for this notification's active time override.",
+          "mute_duration": "Optional override for how long this alert stays hidden after a user mutes it. Leave blank to use Panel settings.",
+          "mute_unit": "Minutes, hours, or days for this notification's mute override."
         }
       },
       "edit_notification": {
         "title": "Edit notification",
+        "description": "Choose a notification, then review its evaluation, result messages, mobile devices, and timing overrides.",
         "data": {
-          "selected_id": "Notification to edit"
+          "selected_id": "Notification to edit",
+          "name": "Display name",
+          "id": "Unique notification ID",
+          "mode": "How should this notification be evaluated?",
+          "entity": "Entity for a simple on/off check",
+          "template": "Advanced Jinja template (optional)",
+          "outcomes": "Messages and appearance for each result",
+          "devices": "Mobile devices for this notification",
+          "persistence": "Time to keep this alert active (optional)",
+          "persistence_unit": "Active time unit",
+          "mute_duration": "Mute time for this alert (optional)",
+          "mute_unit": "Mute time unit"
         },
         "data_description": {
-          "selected_id": "Choose a notification to update its entity, Jinja template, outcomes, devices, and timing settings."
+          "selected_id": "Choose the notification you want to update.",
+          "name": "Friendly name shown on dashboard cards and in mobile notifications.",
+          "id": "Stable internal key used by cards and actions. Existing IDs remain unchanged when editing.",
+          "mode": "Choose Boolean for an on/off result. Choose Multiple outcomes when a template can return several named values.",
+          "entity": "For a simple Boolean notification, select the entity whose on/off state should be checked. Leave empty when the Jinja template supplies the result.",
+          "template": "Optional Jinja that returns true/false, on/off, or one outcome key. Use this when the result depends on multiple entities, attributes, or calculations.",
+          "outcomes": "Map each possible returned value to active, title, message, icon, severity, and optional css fields. The editor accepts YAML or JSON objects and can expand to full screen.",
+          "devices": "Choose one or more Home Assistant mobile app devices. Leave empty to use no delivery targets for this notification.",
+          "persistence": "Optional override for how long this alert stays active. Leave blank to use Panel settings.",
+          "persistence_unit": "Minutes, hours, or days for this notification's active time override.",
+          "mute_duration": "Optional override for how long this alert stays hidden after a user mutes it. Leave blank to use Panel settings.",
+          "mute_unit": "Minutes, hours, or days for this notification's mute override."
         }
       },
       "test_notification": {
@@ -99,8 +140,12 @@
       },
       "remove_notification": {
         "title": "Remove notification",
+        "description": "Permanently remove a notification definition from Notification Center. This does not delete its source entities or devices.",
         "data": {
-          "selected_id": "Notification"
+          "selected_id": "Notification to remove"
+        },
+        "data_description": {
+          "selected_id": "Choose the definition to remove. Any dashboard card set to All will stop showing it automatically."
         }
       }
     },
