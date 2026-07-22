@@ -1,0 +1,26 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Notification Center",
+        "description": "Set panel-wide persistence, mute, and default device settings.",
+        "data": {
+          "name": "Name",
+          "persistence": "Default persistence duration",
+          "persistence_unit": "Persistence unit",
+          "mute_duration": "Default mute duration",
+          "mute_unit": "Mute unit",
+          "devices": "Default mobile devices"
+        }
+      }
+    },
+    "error": {
+      "single_instance_allowed": "Only one Notification Center instance is supported.",
+      "no_notifications": "No notifications have been configured."
+    },
+    "abort": {
+      "single_instance_allowed": "Notification Center is already configured."
+    }
+  }
+}
+

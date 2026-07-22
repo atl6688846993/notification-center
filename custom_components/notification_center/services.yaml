@@ -1,0 +1,48 @@
+mute:
+  name: Mute notification
+  description: Mute an active notification for a duration.
+  fields:
+    notification_id:
+      required: true
+      selector:
+        text:
+    duration:
+      required: false
+      selector:
+        number:
+          min: 0
+          mode: box
+    unit:
+      required: false
+      selector:
+        select:
+          options:
+            - minutes
+            - hours
+            - days
+unmute:
+  name: Unmute notification
+  description: Remove a notification mute.
+  fields:
+    notification_id:
+      required: true
+      selector:
+        text:
+global_mute:
+  name: Mute all notifications
+  description: Suppress active notifications for a duration.
+  fields:
+    duration:
+      required: false
+      selector:
+        number:
+          min: 0
+          mode: box
+    unit:
+      required: false
+      selector:
+        select:
+          options:
+            - minutes
+            - hours
+            - days
