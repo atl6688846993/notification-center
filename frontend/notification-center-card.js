@@ -162,7 +162,7 @@ class NotificationCenterCard extends HTMLElement {
           <div class="count">${active} active${muted ? " · " + muted + " muted" : ""}</div>
           <div class="controls">
             <button class="toggle-muted" title="Show or hide muted notifications">
-              <ha-icon icon="${showMuted ? "mdi:bell-off" : "mdi:bell"}"></ha-icon>
+              <ha-icon icon="${showMuted ? "mdi:eye" : "mdi:eye-off"}"></ha-icon>
             </button>
           </div>
         </header>
