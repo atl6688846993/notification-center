@@ -34,9 +34,9 @@ _DURATION_UNIT_SELECTOR = selector.SelectSelector(
 _MUTE_UNIT_SELECTOR = selector.SelectSelector(
     selector.SelectSelectorConfig(
         options=[
-            "minutes",
-            "hours",
-            "days",
+            {"value": "minutes", "label": "Minutes"},
+            {"value": "hours", "label": "Hours"},
+            {"value": "days", "label": "Days (24 hours each)"},
             {"value": "days_from_now", "label": "Days from now (until midnight)"},
         ],
         mode=selector.SelectSelectorMode.DROPDOWN,
