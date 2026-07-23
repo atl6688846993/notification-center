@@ -66,6 +66,10 @@ The card shows only active, unmuted notifications by default. Muted active notif
 The card editor's **Custom CSS** field applies CSS inside that card. These
 stable classes are available:
 
+- `.notification-header`: The full header row containing the optional icon, title, count, and mute control.
+- `.title-icon`: The optional header icon configured with `title_icon`.
+- `.title`: The card title.
+- `.count`: The active and muted count.
 - `.row`: Every notification row.
 - `.is-active` and `.is-inactive`: Whether the notification is currently active.
 - `.is-muted` and `.is-unmuted`: Whether the notification is currently muted.
@@ -85,9 +89,20 @@ Example card-wide styling:
 ```yaml
 type: custom:notification-center-card
 title: Notifications
+title_icon: mdi:bell
 notifications: all
 empty_text: No alerts need attention
 custom_css: |
+  .notification-header {
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 0.5em;
+    padding: 12px 14px;
+  }
+  .title-icon,
+  .count,
+  .toggle-muted {
+    color: rgba(0, 0, 0, 0.5);
+  }
   .row.is-active {
     background: rgba(255, 255, 255, 0.08);
   }

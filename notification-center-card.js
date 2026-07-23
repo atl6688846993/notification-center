@@ -69,6 +69,7 @@ class NotificationCenterCard extends HTMLElement {
     const showMuted = this._showMuted || this._config.show_muted === true;
     const showInactive = this._showInactive || this._config.show_inactive === true;
     const title = this._config.title || "Notifications";
+    const titleIcon = String(this._config.title_icon || "").trim();
     const cardStyle = this._config.style?.card || "";
     const listStyle = this._config.style?.list || "";
     const customCss = this._config.custom_css || "";
@@ -84,11 +85,16 @@ class NotificationCenterCard extends HTMLElement {
           box-shadow: var(--ha-card-box-shadow, none);
           ${cardStyle}
         }
-        header {
+        header, .notification-header {
           display: flex;
           align-items: center;
           gap: 12px;
           margin-bottom: 12px;
+        }
+        .title-icon {
+          display: flex;
+          align-items: center;
+          flex: 0 0 auto;
         }
         .title { flex: 1; font-size: 1.25rem; font-weight: 700; }
         .count { opacity: .7; font-size: .9rem; }
@@ -129,7 +135,8 @@ class NotificationCenterCard extends HTMLElement {
         ${customCss}
       </style>
       <ha-card>
-        <header>
+        <header class="notification-header">
+          ${titleIcon ? `<div class="title-icon"><ha-icon icon="${this._escape(titleIcon)}"></ha-icon></div>` : ""}
           <div class="title">${this._escape(title)}</div>
           <div class="count">${active} active${muted ? " · " + muted + " muted" : ""}</div>
           <div class="controls">
@@ -312,6 +319,7 @@ class NotificationCenterCardEditor extends HTMLElement {
           <label class="field">Card title
             <input id="title" type="text" value="${this._escape(this._config.title || "Notifications")}">
           </label>
+          <ha-icon-picker id="title_icon" label="Header icon (optional)"></ha-icon-picker>
           <label class="field">Empty-list message
             <textarea id="empty_text" rows="2">${this._escape(this._config.empty_text || "No active notifications")}</textarea>
           </label>
@@ -363,6 +371,12 @@ class NotificationCenterCardEditor extends HTMLElement {
       </div>
     `;
 
+    const titleIconPicker = this.shadowRoot.querySelector("#title_icon");
+    if (titleIconPicker) {
+      titleIconPicker.hass = this._hass;
+      titleIconPicker.value = this._config.title_icon || "";
+      titleIconPicker.addEventListener("value-changed", () => this._commit());
+    }
     this.shadowRoot.querySelector("#title")?.addEventListener("change", () => this._commit());
     this.shadowRoot.querySelector("#empty_text")?.addEventListener("change", () => this._commit());
     this.shadowRoot.querySelector("#custom_css")?.addEventListener("change", () => this._commit());
@@ -385,6 +399,7 @@ class NotificationCenterCardEditor extends HTMLElement {
     const next = {
       ...this._config,
       title: this.shadowRoot.querySelector("#title")?.value || "Notifications",
+      title_icon: this.shadowRoot.querySelector("#title_icon")?.value || "",
       empty_text: this.shadowRoot.querySelector("#empty_text")?.value || "No active notifications",
       notifications: this.shadowRoot.querySelector("#all_notifications")?.checked ? "all" : selected,
       sort: this.shadowRoot.querySelector("#sort")?.value || "severity",
