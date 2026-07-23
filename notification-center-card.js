@@ -210,10 +210,10 @@ class NotificationCenterCard extends HTMLElement {
     ].join(" ");
     const stateText = attrs.outcome && attrs.outcome !== "1" ? "Outcome " + attrs.outcome : "";
     const activeUntil = attrs.expires_at
-      ? "Active until " + new Date(attrs.expires_at).toLocaleString()
+      ? "Active until " + this._formatDateTime(attrs.expires_at)
       : "";
     const meta = muted
-      ? "Muted until " + (attrs.muted_until || "later")
+      ? "Muted until " + (this._formatDateTime(attrs.muted_until) || "later")
       : [stateText, activeUntil].filter(Boolean).join(" · ");
     return `
       <article class="${this._escape(rowClasses)}"
@@ -230,10 +230,24 @@ class NotificationCenterCard extends HTMLElement {
           <div class="meta notification-meta">${this._escape(meta)}</div>
         </div>
         <button class="mute-button" data-mute="${this._escape(id)}" title="${muted ? "Unmute notification" : "Mute notification"}">
-          <ha-icon icon="${muted ? "mdi:bell" : "mdi:bell-off"}"></ha-icon>
+          <ha-icon icon="${muted ? "mdi:eye" : "mdi:eye-off"}"></ha-icon>
         </button>
       </article>
     `;
+  }
+
+  _formatDateTime(value) {
+    if (!value) return "";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value);
+    const pad = (part) => String(part).padStart(2, "0");
+    const hour = date.getHours();
+    const hour12 = hour % 12 || 12;
+    return [
+      `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`,
+      `${pad(hour12)}:${pad(date.getMinutes())}`,
+      hour >= 12 ? "PM" : "AM",
+    ].join(" ");
   }
 
   _escape(value) {
