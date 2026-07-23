@@ -25,9 +25,20 @@ from .const import (
     MODE_OUTCOME,
 )
 
-_UNIT_SELECTOR = selector.SelectSelector(
+_DURATION_UNIT_SELECTOR = selector.SelectSelector(
     selector.SelectSelectorConfig(
         options=["minutes", "hours", "days"],
+        mode=selector.SelectSelectorMode.DROPDOWN,
+    )
+)
+_MUTE_UNIT_SELECTOR = selector.SelectSelector(
+    selector.SelectSelectorConfig(
+        options=[
+            "minutes",
+            "hours",
+            "days",
+            {"value": "days_from_now", "label": "Days from now (until midnight)"},
+        ],
         mode=selector.SelectSelectorMode.DROPDOWN,
     )
 )
@@ -69,9 +80,9 @@ class NotificationCenterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 {
                     vol.Required(CONF_NAME, default="Notification Center"): str,
                     vol.Required(CONF_PERSISTENCE, default=24): vol.Coerce(float),
-                    vol.Required(CONF_PERSISTENCE_UNIT, default="hours"): _UNIT_SELECTOR,
+                    vol.Required(CONF_PERSISTENCE_UNIT, default="hours"): _DURATION_UNIT_SELECTOR,
                     vol.Required(CONF_MUTE_DURATION, default=4): vol.Coerce(float),
-                    vol.Required(CONF_MUTE_UNIT, default="hours"): _UNIT_SELECTOR,
+                    vol.Required(CONF_MUTE_UNIT, default="hours"): _MUTE_UNIT_SELECTOR,
                     vol.Optional(CONF_DEVICES, default=[]): selector.DeviceSelector(
                         selector.DeviceSelectorConfig(multiple=True)
                     ),
@@ -110,9 +121,9 @@ class NotificationCenterOptionsFlow(config_entries.OptionsFlow):
             data_schema=vol.Schema(
                 {
                     vol.Required(CONF_PERSISTENCE, default=settings.get(CONF_PERSISTENCE, 24)): vol.Coerce(float),
-                    vol.Required(CONF_PERSISTENCE_UNIT, default=settings.get(CONF_PERSISTENCE_UNIT, "hours")): _UNIT_SELECTOR,
+                    vol.Required(CONF_PERSISTENCE_UNIT, default=settings.get(CONF_PERSISTENCE_UNIT, "hours")): _DURATION_UNIT_SELECTOR,
                     vol.Required(CONF_MUTE_DURATION, default=settings.get(CONF_MUTE_DURATION, 4)): vol.Coerce(float),
-                    vol.Required(CONF_MUTE_UNIT, default=settings.get(CONF_MUTE_UNIT, "hours")): _UNIT_SELECTOR,
+                    vol.Required(CONF_MUTE_UNIT, default=settings.get(CONF_MUTE_UNIT, "hours")): _MUTE_UNIT_SELECTOR,
                 }
             ),
         )
@@ -218,9 +229,9 @@ class NotificationCenterOptionsFlow(config_entries.OptionsFlow):
                     selector.DeviceSelectorConfig(multiple=True)
                 ),
                 vol.Optional(CONF_PERSISTENCE, default=str(item.get(CONF_PERSISTENCE, ""))): str,
-                vol.Optional(CONF_PERSISTENCE_UNIT, default=item.get(CONF_PERSISTENCE_UNIT, "hours")): _UNIT_SELECTOR,
+                vol.Optional(CONF_PERSISTENCE_UNIT, default=item.get(CONF_PERSISTENCE_UNIT, "hours")): _DURATION_UNIT_SELECTOR,
                 vol.Optional(CONF_MUTE_DURATION, default=str(item.get(CONF_MUTE_DURATION, ""))): str,
-                vol.Optional(CONF_MUTE_UNIT, default=item.get(CONF_MUTE_UNIT, "hours")): _UNIT_SELECTOR,
+                vol.Optional(CONF_MUTE_UNIT, default=item.get(CONF_MUTE_UNIT, "hours")): _MUTE_UNIT_SELECTOR,
             }
         )
 

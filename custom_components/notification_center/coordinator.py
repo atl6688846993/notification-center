@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
+import math
 import logging
 from typing import Any
 
@@ -37,6 +38,23 @@ def _duration(value: Any, unit: str) -> timedelta:
     return timedelta(hours=value)
 
 
+def _mute_deadline(now: datetime, value: Any, unit: str) -> datetime:
+    if unit == "days_from_now":
+        calendar_days = max(1, math.ceil(max(0, float(value or 0))))
+        target_date = now.date() + timedelta(days=calendar_days)
+        return datetime.combine(target_date, time.min, tzinfo=now.tzinfo)
+    return now + _duration(value, unit)
+
+
+def _stored_datetime(value: Any) -> datetime | None:
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(value)
+    except (TypeError, ValueError):
+        return None
+
+
 class NotificationCoordinator(DataUpdateCoordinator[dict[str, RuntimeNotification]]):
     def __init__(self, hass: HomeAssistant, entry) -> None:
         super().__init__(hass, _LOGGER, name="Notification Center", update_interval=None)
@@ -71,34 +89,41 @@ class NotificationCoordinator(DataUpdateCoordinator[dict[str, RuntimeNotificatio
 
     async def _async_update_data(self) -> dict[str, RuntimeNotification]:
         now = datetime.now().astimezone()
+        runtime_changed = False
         for definition in self.definitions:
             notification_id = definition["id"]
             previous = self.runtime.get(notification_id)
             current = self._evaluate(definition)
+            persisted = self.entry.data.get("runtime", {}).get(notification_id, {})
             if not previous and current.active:
-                current.activated_at = now
-                current.expires_at = now + self._persistence(definition)
-            elif previous and current.state != previous.state:
-                current.activated_at = (
-                    now if current.active and not previous.active else previous.activated_at
+                current.activated_at = _stored_datetime(persisted.get("activated_at")) or now
+                current.expires_at = (
+                    _stored_datetime(persisted.get("expires_at"))
+                    or now + self._persistence(definition)
                 )
+                current.muted_until = _stored_datetime(persisted.get("muted_until"))
+                runtime_changed = not bool(persisted.get("expires_at"))
+            elif previous and current.state != previous.state:
+                current.activated_at = now if current.active else None
                 current.expires_at = (
                     now + self._persistence(definition) if current.active else None
                 )
                 current.muted_until = previous.muted_until
                 current.last_delivered = previous.last_delivered
+                runtime_changed = True
             elif previous:
                 current.activated_at = previous.activated_at
                 current.expires_at = previous.expires_at
                 current.muted_until = previous.muted_until
                 current.last_delivered = previous.last_delivered
-            elif notification_id in self.entry.data.get("runtime", {}):
-                persisted = self.entry.data["runtime"][notification_id]
-                if persisted.get("muted_until"):
-                    try:
-                        current.muted_until = datetime.fromisoformat(persisted["muted_until"])
-                    except ValueError:
-                        current.muted_until = None
+            elif persisted:
+                current.activated_at = _stored_datetime(persisted.get("activated_at"))
+                current.expires_at = _stored_datetime(persisted.get("expires_at"))
+                current.muted_until = _stored_datetime(persisted.get("muted_until"))
+
+            if current.active and current.expires_at and now >= current.expires_at:
+                current.active = False
+
             self.runtime[notification_id] = current
             if previous and current.state != previous.state:
                 event_name = None
@@ -114,6 +139,8 @@ class NotificationCoordinator(DataUpdateCoordinator[dict[str, RuntimeNotificatio
                         definition.get("devices") or self.settings.get("devices", [])
                     )
                     await self.delivery.async_deliver(delivery_definition, current, event_name)
+        if runtime_changed:
+            self._persist_runtime()
         self.async_set_updated_data(self.runtime)
         return self.runtime
 
@@ -124,7 +151,11 @@ class NotificationCoordinator(DataUpdateCoordinator[dict[str, RuntimeNotificatio
     def _evaluate(self, definition: dict[str, Any]) -> RuntimeNotification:
         try:
             mode = definition.get(CONF_MODE, MODE_BOOLEAN)
-            if mode == MODE_BOOLEAN and definition.get(CONF_ENTITY):
+            if (
+                mode == MODE_BOOLEAN
+                and definition.get(CONF_ENTITY)
+                and not definition.get(CONF_TEMPLATE)
+            ):
                 rendered = self.hass.states.get(definition[CONF_ENTITY])
                 rendered = rendered.state if rendered else "off"
             else:
@@ -202,7 +233,9 @@ class NotificationCoordinator(DataUpdateCoordinator[dict[str, RuntimeNotificatio
         item = self.runtime[notification_id]
         definition = self.definition(notification_id) or {}
         mute = {**self.settings, **definition.get("mute", {})}
-        item.muted_until = datetime.now().astimezone() + _duration(
+        now = datetime.now().astimezone()
+        item.muted_until = _mute_deadline(
+            now,
             duration if duration is not None else mute.get(CONF_MUTE_DURATION),
             unit or mute.get(CONF_MUTE_UNIT),
         )
@@ -216,11 +249,11 @@ class NotificationCoordinator(DataUpdateCoordinator[dict[str, RuntimeNotificatio
             self.async_set_updated_data(self.runtime)
 
     async def async_global_mute(self, duration: float | None = None, unit: str | None = None) -> None:
-        self.settings["global_muted_until"] = (
-            datetime.now().astimezone() + _duration(
-                duration if duration is not None else self.settings["mute_duration"],
-                unit or self.settings["mute_unit"],
-            )
+        now = datetime.now().astimezone()
+        self.settings["global_muted_until"] = _mute_deadline(
+            now,
+            duration if duration is not None else self.settings["mute_duration"],
+            unit or self.settings["mute_unit"],
         ).isoformat()
         self._persist_runtime()
         self.async_set_updated_data(self.runtime)

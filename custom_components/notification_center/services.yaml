@@ -1,6 +1,6 @@
 mute:
   name: Mute notification
-  description: Mute an active notification for a duration.
+  description: Mute an active notification for an elapsed duration or until a future local midnight.
   fields:
     notification_id:
       required: true
@@ -20,6 +20,7 @@ mute:
             - minutes
             - hours
             - days
+            - days_from_now
 unmute:
   name: Unmute notification
   description: Remove a notification mute.
@@ -30,7 +31,7 @@ unmute:
         text:
 global_mute:
   name: Mute all notifications
-  description: Suppress active notifications for a duration.
+  description: Suppress active notifications for an elapsed duration or until a future local midnight.
   fields:
     duration:
       required: false
@@ -46,6 +47,7 @@ global_mute:
             - minutes
             - hours
             - days
+            - days_from_now
 test:
   name: Test notification delivery
   description: Send a configured notification outcome to its selected mobile devices without changing notification state.

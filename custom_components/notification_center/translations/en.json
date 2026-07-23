@@ -6,7 +6,7 @@
         "description": "Create the Notification Center panel. These defaults apply to every notification unless an individual notification overrides them.",
         "data": {
           "name": "Notification Center name",
-          "persistence": "Default time to keep alerts active",
+          "persistence": "Default maximum active time",
           "persistence_unit": "Active time unit",
           "mute_duration": "Default mute time",
           "mute_unit": "Mute time unit",
@@ -14,10 +14,10 @@
         },
         "data_description": {
           "name": "Name shown for this integration in Home Assistant.",
-          "persistence": "How long an alert remains active after it is triggered, unless that notification clears sooner.",
+          "persistence": "Maximum time an alert may remain active after it is triggered. It still clears immediately if its entity or template becomes inactive sooner.",
           "persistence_unit": "Minutes, hours, or days for the default active time.",
           "mute_duration": "How long a user-triggered mute hides an active alert before it appears again.",
-          "mute_unit": "Minutes, hours, or days for the default mute time.",
+          "mute_unit": "Choose minutes, hours, days, or Days from now. With Days from now, 1 hides the alert until midnight at the start of tomorrow.",
           "devices": "Mobile app devices used when a notification does not choose its own delivery targets. Leave empty for no default delivery."
         }
       }
@@ -47,16 +47,16 @@
         "title": "Panel settings",
         "description": "Set the default active and mute times used by notifications that do not define their own overrides.",
         "data": {
-          "persistence": "Default time to keep alerts active",
+          "persistence": "Default maximum active time",
           "persistence_unit": "Active time unit",
           "mute_duration": "Default mute time",
           "mute_unit": "Mute time unit"
         },
         "data_description": {
-          "persistence": "How long an alert remains active after it is triggered, unless its evaluation clears sooner.",
+          "persistence": "Maximum time an alert may remain active after it is triggered. It still clears immediately if its evaluation becomes inactive sooner.",
           "persistence_unit": "Minutes, hours, or days for the default active time.",
           "mute_duration": "How long an active alert stays hidden when a dashboard user mutes it.",
-          "mute_unit": "Minutes, hours, or days for the default mute time."
+          "mute_unit": "Choose minutes, hours, days, or Days from now. With Days from now, 1 hides the alert until midnight at the start of tomorrow."
         }
       },
       "add_notification": {
@@ -80,13 +80,13 @@
           "id": "Stable internal key used by cards and actions. Use lowercase letters, numbers, and underscores; do not change it after automations depend on it.",
           "mode": "Choose Boolean for an on/off result. Choose Multiple outcomes when a template can return several named values.",
           "entity": "For a simple Boolean notification, select the entity whose on/off state should be checked. Leave empty when the Jinja template supplies the result.",
-          "template": "Optional Jinja that returns true/false, on/off, or one outcome key. Use this when the result depends on multiple entities, attributes, or calculations.",
+          "template": "Optional Jinja that returns true/false, on/off, or one outcome key. When supplied, this template takes precedence over the entity picker.",
           "outcomes": "Map each possible returned value to active, title, message, icon, severity, and optional css fields. The editor accepts YAML or JSON objects and can expand to full screen.",
           "devices": "Choose one or more Home Assistant mobile app devices. Leave empty to use no delivery targets for this notification.",
-          "persistence": "Optional override for how long this alert stays active. Leave blank to use Panel settings.",
+          "persistence": "Optional override for the maximum time this alert may remain active. Leave blank to use Panel settings.",
           "persistence_unit": "Minutes, hours, or days for this notification's active time override.",
           "mute_duration": "Optional override for how long this alert stays hidden after a user mutes it. Leave blank to use Panel settings.",
-          "mute_unit": "Minutes, hours, or days for this notification's mute override."
+          "mute_unit": "Choose minutes, hours, days, or Days from now. With Days from now, 1 ends the mute at midnight at the start of tomorrow."
         }
       },
       "edit_notification": {
@@ -112,13 +112,13 @@
           "id": "Stable internal key used by cards and actions. Existing IDs remain unchanged when editing.",
           "mode": "Choose Boolean for an on/off result. Choose Multiple outcomes when a template can return several named values.",
           "entity": "For a simple Boolean notification, select the entity whose on/off state should be checked. Leave empty when the Jinja template supplies the result.",
-          "template": "Optional Jinja that returns true/false, on/off, or one outcome key. Use this when the result depends on multiple entities, attributes, or calculations.",
+          "template": "Optional Jinja that returns true/false, on/off, or one outcome key. When supplied, this template takes precedence over the entity picker.",
           "outcomes": "Map each possible returned value to active, title, message, icon, severity, and optional css fields. The editor accepts YAML or JSON objects and can expand to full screen.",
           "devices": "Choose one or more Home Assistant mobile app devices. Leave empty to use no delivery targets for this notification.",
-          "persistence": "Optional override for how long this alert stays active. Leave blank to use Panel settings.",
+          "persistence": "Optional override for the maximum time this alert may remain active. Leave blank to use Panel settings.",
           "persistence_unit": "Minutes, hours, or days for this notification's active time override.",
           "mute_duration": "Optional override for how long this alert stays hidden after a user mutes it. Leave blank to use Panel settings.",
-          "mute_unit": "Minutes, hours, or days for this notification's mute override."
+          "mute_unit": "Choose minutes, hours, days, or Days from now. With Days from now, 1 ends the mute at midnight at the start of tomorrow."
         }
       },
       "test_notification": {

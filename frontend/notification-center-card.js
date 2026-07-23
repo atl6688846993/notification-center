@@ -181,6 +181,12 @@ class NotificationCenterCard extends HTMLElement {
       muted ? "is-muted" : "is-unmuted",
     ].join(" ");
     const stateText = attrs.outcome && attrs.outcome !== "1" ? "Outcome " + attrs.outcome : "";
+    const activeUntil = attrs.expires_at
+      ? "Active until " + new Date(attrs.expires_at).toLocaleString()
+      : "";
+    const meta = muted
+      ? "Muted until " + (attrs.muted_until || "later")
+      : [stateText, activeUntil].filter(Boolean).join(" · ");
     return `
       <article class="${this._escape(rowClasses)}"
         data-notification-id="${this._escape(id)}"
@@ -193,7 +199,7 @@ class NotificationCenterCard extends HTMLElement {
         <div class="copy">
           <div class="name notification-name">${this._escape(name)}</div>
           <div class="message notification-message">${this._escape(message)}</div>
-          <div class="meta notification-meta">${muted ? "Muted until " + this._escape(attrs.muted_until || "later") : stateText}</div>
+          <div class="meta notification-meta">${this._escape(meta)}</div>
         </div>
         <button class="mute-button" data-mute="${this._escape(id)}" title="${muted ? "Unmute notification" : "Mute notification"}">
           <ha-icon icon="${muted ? "mdi:bell" : "mdi:bell-off"}"></ha-icon>

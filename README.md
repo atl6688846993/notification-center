@@ -164,17 +164,35 @@ Open the Notification Center integration and choose **Configure**. The options
 menu uses these terms:
 
 - **Panel settings**: Defaults used when an individual notification does not provide an override.
-- **Default time to keep alerts active**: How long an active alert remains available unless its evaluation clears sooner.
+- **Default maximum active time**: The longest an alert may remain active. It clears sooner when its entity or template becomes inactive.
 - **Default mute time**: How long a muted active alert stays hidden before it appears again.
 - **Default mobile notification devices**: Devices used when a notification does not specify its own delivery targets.
 - **Display name**: Friendly name shown on cards and in mobile notifications.
 - **Unique notification ID**: Stable internal key used by cards and actions. Use lowercase letters, numbers, and underscores.
 - **How should this notification be evaluated?**: Choose **Boolean (on/off)** for two-state checks or **Multiple outcomes** for a template that returns several named values.
-- **Entity for a simple on/off check**: Direct entity picker for Boolean notifications. A Jinja template is unnecessary when the entity state alone determines the result.
-- **Advanced Jinja template**: Optional logic for checks involving multiple entities, attributes, or calculations.
+- **Entity for a simple on/off check**: Direct entity picker for Boolean notifications. It is used only when the Jinja template is blank.
+- **Advanced Jinja template**: Optional logic for checks involving multiple entities, attributes, or calculations. When supplied, it takes precedence over the entity picker.
 - **Messages and appearance for each result**: Expandable YAML/JSON object mapping returned values to `active`, `title`, `message`, `icon`, `severity`, and optional `css` fields.
 - **Mobile devices for this notification**: One or more Home Assistant mobile app devices. An empty list disables mobile delivery for that definition.
 - **Active time** and **Mute time** overrides: Optional per-notification values that replace Panel settings.
+
+### Active and mute timing
+
+**Maximum active time** starts when a notification first becomes active or
+changes to another active outcome. It is a maximum display window, not a delay:
+
+- If the source entity or template clears first, the notification clears immediately.
+- If maximum active time expires first, the notification becomes inactive and disappears from cards.
+- It can activate again only after its source clears and later becomes active again.
+- Cards show `Active until` for active, unmuted rows.
+
+**Mute time** only hides an active notification. It does not clear the source,
+change the outcome, or extend maximum active time:
+
+- If mute expires while the notification is still active and within its active window, it appears again.
+- If maximum active time expires while muted, the notification remains inactive when the mute ends.
+- `Minutes`, `Hours`, and `Days` are elapsed durations.
+- `Days from now` uses local calendar boundaries. A value of `1` always ends at midnight at the start of tomorrow; `2` ends at midnight at the start of the following day.
 
 ### Boolean notifications
 
