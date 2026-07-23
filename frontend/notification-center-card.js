@@ -6,16 +6,21 @@ class NotificationCenterCard extends HTMLElement {
     this._hass = null;
     this._showMuted = false;
     this._showInactive = false;
+    this._lastStateSignature = null;
   }
 
   setConfig(config) {
     if (!config) throw new Error("Notification Center requires a configuration.");
     this._config = config;
+    this._lastStateSignature = this._notificationStateSignature(this._hass);
     this._render();
   }
 
   set hass(value) {
+    const signature = this._notificationStateSignature(value);
     this._hass = value;
+    if (signature === this._lastStateSignature) return;
+    this._lastStateSignature = signature;
     this._render();
   }
 
@@ -25,6 +30,22 @@ class NotificationCenterCard extends HTMLElement {
 
   getCardSize() {
     return 2;
+  }
+
+  _notificationStateSignature(hass) {
+    if (!hass) return "";
+    const configured = this._config.notifications;
+    const wanted = configured === "all" || !configured
+      ? null
+      : new Set(Array.isArray(configured) ? configured : [configured]);
+
+    return JSON.stringify(
+      Object.entries(hass.states)
+        .filter(([, state]) => state.attributes?.notification_id)
+        .filter(([, state]) => !wanted || wanted.has(state.attributes.notification_id))
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([entityId, state]) => [entityId, state.state, state.attributes])
+    );
   }
 
   _notificationEntities() {
